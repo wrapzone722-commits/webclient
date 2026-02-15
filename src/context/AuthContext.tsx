@@ -19,6 +19,7 @@ interface AuthContextValue {
   apiKey: string | null;
   isReady: boolean;
   register: () => Promise<void>;
+  setToken: (token: string) => void;
   logout: () => void;
 }
 
@@ -41,6 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsReady(true);
   }, []);
 
+  const setToken = useCallback((token: string) => {
+    const t = token.trim();
+    if (!t) return;
+    localStorage.setItem(STORAGE_KEY, t);
+    setApiKey(t);
+    setIsReady(true);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setApiKey(null);
@@ -58,11 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     register().catch(() => setIsReady(true));
-  }, [apiBaseUrl]);
+  }, [apiBaseUrl, apiKey, register]);
 
   const value = useMemo(
-    () => ({ apiKey, isReady, register, logout }),
-    [apiKey, isReady, register, logout]
+    () => ({ apiKey, isReady, register, setToken, logout }),
+    [apiKey, isReady, register, setToken, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

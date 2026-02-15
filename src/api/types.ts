@@ -117,3 +117,16 @@ export interface RegisterClientResponse {
   client_id: string;
   api_key: string;
 }
+
+export interface TelegramWidgetConfigResponse {
+  bot_username: string;
+}
+
+export interface TelegramLoginResponse {
+  session_token: string;
+  account_id: string;
+  email: string;
+  name: string;
+  verified: boolean;
+  requires_verification: boolean;
+}

@@ -20,27 +20,28 @@ function GuardedRoutes() {
     );
   }
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<HomePage />} />
-          <Route path="services/:id" element={<ServiceDetailPage />} />
-          <Route path="services/:id/book" element={<BookingCreatePage />} />
-          <Route path="bookings" element={<BookingsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </AuthProvider>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="connect" element={<ConnectPage />} />
+        <Route path="services/:id" element={<ServiceDetailPage />} />
+        <Route path="services/:id/book" element={<BookingCreatePage />} />
+        <Route path="bookings" element={<BookingsPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
   );
 }
 
 export default function App() {
   return (
     <BackendProvider>
-      <BrowserRouter>
-        <GuardedRoutes />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <GuardedRoutes />
+        </BrowserRouter>
+      </AuthProvider>
     </BackendProvider>
   );
 }

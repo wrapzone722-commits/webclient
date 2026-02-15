@@ -168,6 +168,8 @@ import type {
   UpdateProfileRequest,
   CarFolder,
   Notification,
+  TelegramWidgetConfigResponse,
+  TelegramLoginResponse,
 } from "./types";
 
 export async function registerClient(deviceId: string): Promise<RegisterClientResponse> {
@@ -244,4 +246,14 @@ export async function fetchNotifications(): Promise<Notification[]> {
 
 export async function markNotificationRead(id: string): Promise<void> {
   await apiPatch(`/notifications/${id}/read`, {});
+}
+
+// ——— Telegram Login Widget ———
+
+export async function fetchTelegramWidgetConfig(): Promise<TelegramWidgetConfigResponse> {
+  return apiGet<TelegramWidgetConfigResponse>("/auth/telegram/widget-config");
+}
+
+export async function loginByTelegramWidget(payload: Record<string, unknown>): Promise<TelegramLoginResponse> {
+  return apiPost<TelegramLoginResponse>("/auth/login/telegram", payload);
 }

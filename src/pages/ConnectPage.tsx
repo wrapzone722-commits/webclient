@@ -4,10 +4,13 @@ import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser"
 import { useBackend } from "@/context/BackendContext";
 import { useAuth } from "@/context/AuthContext";
 import { fetchTelegramWidgetConfig, loginByTelegramWidget } from "@/api/client";
+import { useLegal } from "@/context/LegalContext";
+import { Link } from "react-router-dom";
 
 export function ConnectPage() {
   const { apiBaseUrl, setFromManual, setFromQr } = useBackend();
   const { setToken, apiKey } = useAuth();
+  const { accepted, accept } = useLegal();
   const navigate = useNavigate();
   const [manual, setManual] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +115,25 @@ export function ConnectPage() {
         </p>
 
         <div className="mt-4 bg-card/70 backdrop-blur-xl border border-border rounded-2xl shadow-ios p-4 space-y-3">
+          {!accepted && (
+            <div className="p-3 rounded-2xl bg-card/70 border border-border">
+              <label className="flex items-start gap-2 text-sm text-fg">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={false}
+                  onChange={() => accept()}
+                />
+                <span>
+                  Я ознакомился(ась) и принимаю{" "}
+                  <Link to="/legal" className="text-accent font-medium underline">
+                    Политику и Согласие
+                  </Link>
+                  .
+                </span>
+              </label>
+            </div>
+          )}
           {apiBaseUrl && (
             <div className="p-3 rounded-2xl bg-accent/10 border border-accent/25">
               <p className="text-sm text-fg">
@@ -147,6 +169,7 @@ export function ConnectPage() {
               setFromManual(manual);
             }}
             className="w-full py-2 bg-accent text-accent-fg rounded-2xl text-sm shadow-ios2"
+            disabled={!accepted}
           >
             Сохранить
           </button>
@@ -156,6 +179,7 @@ export function ConnectPage() {
               type="button"
               onClick={() => setScanning((v) => !v)}
               className="w-full py-2 border border-border bg-card/50 rounded-2xl text-sm text-fg"
+              disabled={!accepted}
             >
               {scanning ? "Остановить сканер" : "Сканировать QR-код"}
             </button>
@@ -172,7 +196,7 @@ export function ConnectPage() {
             )}
           </div>
 
-          {apiBaseUrl && tgBot && (
+          {apiBaseUrl && tgBot && accepted && (
             <div className="pt-2 border-t border-border">
               <p className="text-sm font-medium text-fg mb-2">Авторизация</p>
               {apiKey && (

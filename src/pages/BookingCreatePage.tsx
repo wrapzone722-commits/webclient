@@ -4,8 +4,10 @@ import { fetchService, fetchPosts, fetchSlots, createBooking } from "@/api/clien
 import type { Service } from "@/api/types";
 import type { Post, TimeSlot } from "@/api/types";
 import { formatPrice, formatDuration, toDateString, toISODateTime } from "@/lib/format";
+import { useLegal } from "@/context/LegalContext";
 
 export function BookingCreatePage() {
+  const { accepted } = useLegal();
   const { id } = useParams<{ id: string }>();
   const [service, setService] = useState<Service | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -63,6 +65,7 @@ export function BookingCreatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!accepted) return;
     if (!service || !selectedSlot || !selectedDate) return;
     setSubmitting(true);
     setError(null);
@@ -120,6 +123,15 @@ export function BookingCreatePage() {
         <p className="text-sm text-muted-fg mt-1">{formatPrice(service.price)} · {formatDuration(service.duration)}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {!accepted && (
+          <div className="bg-card/70 backdrop-blur-xl border border-border rounded-2xl p-3 text-sm text-muted-fg">
+            Чтобы создать запись, примите{" "}
+            <Link to="/legal" className="text-accent font-medium underline">
+              документы
+            </Link>
+            .
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-fg mb-1">Дата</label>
           <input
@@ -183,7 +195,7 @@ export function BookingCreatePage() {
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <button
           type="submit"
-          disabled={submitting || !selectedSlot}
+          disabled={submitting || !selectedSlot || !accepted}
           className="w-full py-3.5 bg-accent text-accent-fg font-semibold rounded-2xl shadow-ios2 disabled:opacity-50"
         >
           {submitting ? "Отправка..." : "Подтвердить запись"}

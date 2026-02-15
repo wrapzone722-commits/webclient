@@ -84,7 +84,6 @@ export function ConnectPage() {
               return;
             }
             setScanning(false);
-            navigate("/", { replace: true });
           }
           if (err) {
             // zxing часто кидает NotFoundException пока не нашёл QR — это нормально

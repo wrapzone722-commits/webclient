@@ -8,8 +8,12 @@ async function loadRuntimeConfig() {
   try {
     const r = await fetch("/config.json");
     if (!r.ok) return;
-    const data = (await r.json()) as { api_base_url?: string };
-    const url = data?.api_base_url;
+    const text = await r.text();
+    const trimmed = text.trim();
+    // Если сервер отдал HTML (SPA fallback или страница ошибки), не пытаемся парсить как JSON
+    if (trimmed.startsWith("<") || trimmed.startsWith("<!")) return;
+    const data = JSON.parse(text) as { api_base_url?: string };
+    const url = data.api_base_url;
     if (typeof url === "string" && url.trim()) {
       const base = url.trim().replace(/\/$/, "");
       (window as Window & { __API_BASE_URL__?: string }).__API_BASE_URL__ = base;
@@ -20,10 +24,12 @@ async function loadRuntimeConfig() {
   }
 }
 
-await loadRuntimeConfig();
+function renderApp() {
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+loadRuntimeConfig().finally(renderApp);

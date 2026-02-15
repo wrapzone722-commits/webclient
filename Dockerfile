@@ -19,6 +19,10 @@ WORKDIR /usr/share/nginx/html
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Runtime config: генерируем /config.json из переменной API_BASE_URL (или VITE_API_BASE_URL)
+COPY docker-entrypoint.d/99-runtime-config.sh /docker-entrypoint.d/99-runtime-config.sh
+RUN chmod +x /docker-entrypoint.d/99-runtime-config.sh
+
 COPY --from=builder /app/dist .
 
 EXPOSE 80

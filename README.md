@@ -50,6 +50,11 @@ docker run -p 80:80 webclient
    ```
    Или в Docker: `docker build --build-arg VITE_API_BASE_URL=https://... .`
 
+3. **Timeweb Cloud / Docker (без пересборки)**  
+   В контейнере nginx есть скрипт, который **создаёт `/config.json` на старте** из переменной окружения **`API_BASE_URL`** (или `VITE_API_BASE_URL`).  
+   Поэтому в Timeweb Cloud достаточно добавить переменную окружения приложения:
+   - `API_BASE_URL=https://ваш-бэкенд.example.com`
+
 ## Структура (по образцу iOS)
 
 - **Услуги** — список услуг, поиск, переход в детали и запись на услугу (дата, пост, слоты, комментарий).

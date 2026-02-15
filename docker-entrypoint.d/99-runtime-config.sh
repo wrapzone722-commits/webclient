@@ -20,6 +20,10 @@ fi
 
 # Убираем слэш в конце
 BASE="$(printf %s "$BASE" | sed 's:/*$::')"
+# Если по ошибке передали полный /api/v1 — убираем, чтобы не получить /api/v1/api/v1
+case "$BASE" in
+  */api/v1) BASE="${BASE%/api/v1}" ;;
+esac
 
 CONFIG_PATH="/usr/share/nginx/html/config.json"
 

@@ -15,7 +15,7 @@ async function loadRuntimeConfig() {
     const data = JSON.parse(text) as { api_base_url?: string };
     const url = data.api_base_url;
     if (typeof url === "string" && url.trim()) {
-      const base = url.trim().replace(/\/$/, "");
+      const base = url.trim().replace(/\/$/, "").replace(/\/api\/v1$/, "");
       (window as Window & { __API_BASE_URL__?: string }).__API_BASE_URL__ = base;
       setApiBaseUrl(base);
     }

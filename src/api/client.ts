@@ -3,19 +3,26 @@
  * Базовый URL: из window.__API_BASE_URL__ (runtime), иначе VITE_API_BASE_URL (сборка).
  */
 
+function normalizeBaseUrl(value: string): string {
+  let s = value.trim().replace(/\/$/, "");
+  // иногда по ошибке задают полный /api/v1 — чтобы не получить /api/v1/api/v1
+  if (s.endsWith("/api/v1")) s = s.slice(0, -"/api/v1".length);
+  return s;
+}
+
 function getBaseUrl(): string {
   const win = typeof window !== "undefined" ? (window as Window & { __API_BASE_URL__?: string }) : null;
   const fromWindow = win?.__API_BASE_URL__;
-  if (fromWindow && typeof fromWindow === "string") return fromWindow.replace(/\/$/, "");
+  if (fromWindow && typeof fromWindow === "string") return normalizeBaseUrl(fromWindow);
   const env =
     typeof import.meta !== "undefined" &&
     (import.meta as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL;
-  return (env && env.replace(/\/$/, "")) || "";
+  return (env && normalizeBaseUrl(env)) || "";
 }
 
 let BASE = getBaseUrl();
 export function setApiBaseUrl(url: string) {
-  BASE = url.replace(/\/$/, "");
+  BASE = normalizeBaseUrl(url);
 }
 
 const API_PREFIX = "/api/v1";

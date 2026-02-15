@@ -91,16 +91,16 @@ export function BookingsPage() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-semibold text-gray-900 mb-4">Мои записи</h1>
-      <div className="flex rounded-lg bg-gray-100 p-1 mb-4">
+    <div className="p-4 max-w-md mx-auto">
+      <h1 className="text-3xl font-semibold text-fg tracking-tight mb-4">Мои записи</h1>
+      <div className="flex rounded-2xl bg-muted p-1 mb-4 shadow-ios">
         {(["upcoming", "past", "cancelled"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
-            className={`flex-1 py-2 text-sm font-medium rounded-md ${
-              tab === t ? "bg-white shadow text-gray-900" : "text-gray-600"
+            className={`flex-1 py-2.5 text-xs font-medium rounded-xl transition ${
+              tab === t ? "bg-card text-fg shadow-ios2" : "text-muted-fg hover:text-fg"
             }`}
           >
             {t === "upcoming" ? "Предстоящие" : t === "past" ? "Прошедшие" : "Отменённые"}
@@ -108,11 +108,11 @@ export function BookingsPage() {
         ))}
       </div>
       {loading && bookings.length === 0 ? (
-        <div className="text-gray-500 py-8 text-center">Загрузка записей...</div>
+        <div className="text-muted-fg py-10 text-center">Загрузка записей...</div>
       ) : error && bookings.length === 0 ? (
         <div className="text-red-600 py-4">{error}</div>
       ) : filtered.length === 0 ? (
-        <div className="text-gray-500 py-8 text-center">
+        <div className="text-muted-fg py-10 text-center">
           {tab === "upcoming" && "Нет предстоящих записей"}
           {tab === "past" && "Нет прошедших записей"}
           {tab === "cancelled" && "Нет отменённых записей"}
@@ -120,11 +120,11 @@ export function BookingsPage() {
       ) : (
         <ul className="space-y-3">
           {filtered.map((b) => (
-            <li key={b._id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <li key={b._id} className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border shadow-ios p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="font-medium text-gray-900">{b.service_name}</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">
+                  <h2 className="font-medium text-fg">{b.service_name}</h2>
+                  <p className="text-sm text-muted-fg mt-0.5">
                     {formatDate(b.date_time)} · {formatTime(b.date_time)}
                   </p>
                   <span
@@ -144,11 +144,11 @@ export function BookingsPage() {
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-blue-600 font-medium">{formatPrice(b.price)}</span>
+                  <span className="text-accent font-semibold">{formatPrice(b.price)}</span>
                 </div>
               </div>
               {b.notes && b.notes.trim() && (
-                <p className="text-sm text-gray-500 mt-1">{b.notes}</p>
+                <p className="text-sm text-muted-fg mt-2">{b.notes}</p>
               )}
               <div className="mt-3 flex flex-wrap gap-2">
                 {(b.status === "pending" || b.status === "confirmed") && (
@@ -168,7 +168,7 @@ export function BookingsPage() {
                       <button
                         type="button"
                         onClick={() => setRatingBooking(b)}
-                        className="text-sm text-amber-600"
+                        className="text-sm text-amber-500 font-medium"
                       >
                         Оценить
                       </button>
@@ -177,7 +177,7 @@ export function BookingsPage() {
                       type="button"
                       onClick={() => handleAct(b)}
                       disabled={actLoadingId === b._id}
-                      className="text-sm text-blue-600 disabled:opacity-50"
+                      className="text-sm text-accent font-medium disabled:opacity-50"
                     >
                       {actLoadingId === b._id ? "Загрузка..." : "Акт"}
                     </button>
@@ -189,7 +189,7 @@ export function BookingsPage() {
         </ul>
       )}
       {actError && (
-        <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        <div className="mt-4 p-3 bg-card/70 backdrop-blur-xl border border-border text-red-700 rounded-2xl text-sm shadow-ios">
           {actError}
           <button type="button" onClick={() => setActError(null)} className="ml-2 underline">
             Закрыть
@@ -198,21 +198,21 @@ export function BookingsPage() {
       )}
       {cancelConfirmId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-10">
-          <div className="bg-white rounded-xl p-4 max-w-sm w-full">
-            <p className="text-gray-900 font-medium">Отменить запись?</p>
-            <p className="text-sm text-gray-500 mt-1">Запись будет отменена.</p>
+          <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border shadow-ios p-4 max-w-sm w-full">
+            <p className="text-fg font-medium">Отменить запись?</p>
+            <p className="text-sm text-muted-fg mt-1">Запись будет отменена.</p>
             <div className="mt-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => handleCancel(cancelConfirmId)}
-                className="flex-1 py-2 bg-red-600 text-white rounded-lg text-sm"
+                className="flex-1 py-2 bg-destructive text-white rounded-2xl text-sm shadow-ios2"
               >
                 Отменить запись
               </button>
               <button
                 type="button"
                 onClick={() => setCancelConfirmId(null)}
-                className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm"
+                className="flex-1 py-2 bg-muted text-fg rounded-2xl text-sm"
               >
                 Назад
               </button>
@@ -222,9 +222,9 @@ export function BookingsPage() {
       )}
       {ratingBooking && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-10">
-          <div className="bg-white rounded-xl p-4 max-w-sm w-full">
-            <p className="text-gray-900 font-medium">Оценить запись</p>
-            <p className="text-sm text-gray-500 mt-1">{ratingBooking.service_name}</p>
+          <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border shadow-ios p-4 max-w-sm w-full">
+            <p className="text-fg font-medium">Оценить запись</p>
+            <p className="text-sm text-muted-fg mt-1">{ratingBooking.service_name}</p>
             <div className="mt-3 flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
@@ -241,7 +241,7 @@ export function BookingsPage() {
               placeholder="Комментарий (необязательно)"
               value={ratingComment}
               onChange={(e) => setRatingComment(e.target.value)}
-              className="mt-3 w-full border border-gray-200 rounded-lg p-2 text-sm"
+              className="mt-3 w-full border border-border bg-card rounded-2xl p-3 text-sm text-fg placeholder:text-muted-fg"
               rows={2}
             />
             <div className="mt-4 flex gap-2">
@@ -249,14 +249,14 @@ export function BookingsPage() {
                 type="button"
                 onClick={handleRatingSubmit}
                 disabled={ratingSubmitting}
-                className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50"
+                className="flex-1 py-2 bg-accent text-accent-fg rounded-2xl text-sm shadow-ios2 disabled:opacity-50"
               >
                 {ratingSubmitting ? "Отправка..." : "Отправить"}
               </button>
               <button
                 type="button"
                 onClick={() => setRatingBooking(null)}
-                className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm"
+                className="flex-1 py-2 bg-muted text-fg rounded-2xl text-sm"
               >
                 Отмена
               </button>

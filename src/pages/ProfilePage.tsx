@@ -15,6 +15,9 @@ const clientTierLabel: Record<string, string> = {
   pride: "Прайд",
 };
 
+type ThemePref = "light" | "dark" | "system";
+const THEME_KEY = "sb_web_theme";
+
 export function ProfilePage() {
   const { apiKey, logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
@@ -31,6 +34,19 @@ export function ProfilePage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showCars, setShowCars] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [theme, setTheme] = useState<ThemePref>(() => {
+    const raw = localStorage.getItem(THEME_KEY);
+    return raw === "light" || raw === "dark" || raw === "system" ? raw : "system";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(THEME_KEY, theme);
+    const root = document.documentElement;
+    const wantsDark =
+      theme === "dark" ||
+      (theme === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    root.classList.toggle("dark", wantsDark);
+  }, [theme]);
 
   const loadProfile = useCallback(() => {
     if (!apiKey) return;
@@ -111,42 +127,42 @@ export function ProfilePage() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-semibold text-gray-900 mb-4">Профиль</h1>
+    <div className="p-4 max-w-md mx-auto">
+      <h1 className="text-2xl font-semibold text-fg mb-4 tracking-tight">Профиль</h1>
       {loading ? (
-        <div className="text-gray-500">Загрузка...</div>
+        <div className="text-muted-fg">Загрузка...</div>
       ) : error && !user ? (
         <div className="text-red-600">{error}</div>
       ) : user ? (
         <>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+          <div className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border shadow-ios p-4 space-y-3">
             <div className="flex items-center gap-3">
               {user.avatar_url || user.profile_photo_url ? (
                 <img
                   src={user.avatar_url || user.profile_photo_url || ""}
                   alt=""
-                  className="w-14 h-14 rounded-full object-cover bg-gray-100"
+                  className="w-14 h-14 rounded-full object-cover bg-muted ring-1 ring-border"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-medium">
+                <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-muted-fg font-medium ring-1 ring-border">
                   {displayName.slice(0, 2).toUpperCase()}
                 </div>
               )}
               <div className="flex-1">
                 {!editing ? (
                   <>
-                    <p className="font-medium text-gray-900">{displayName}</p>
-                    {user.email && <p className="text-sm text-gray-500">{user.email}</p>}
+                    <p className="font-medium text-fg">{displayName}</p>
+                    {user.email && <p className="text-sm text-muted-fg">{user.email}</p>}
                     {user.phone && !String(user.phone).startsWith("device:") && (
-                      <p className="text-sm text-gray-500">{user.phone}</p>
+                      <p className="text-sm text-muted-fg">{user.phone}</p>
                     )}
                     {user.client_tier && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-fg">
                         {clientTierLabel[user.client_tier] ?? user.client_tier}
                       </p>
                     )}
                     {typeof user.loyalty_points === "number" && (
-                      <p className="text-xs text-gray-500">Баллы: {user.loyalty_points}</p>
+                      <p className="text-xs text-muted-fg">Баллы: {user.loyalty_points}</p>
                     )}
                   </>
                 ) : (
@@ -156,35 +172,35 @@ export function ProfilePage() {
                       placeholder="Имя"
                       value={editFirst}
                       onChange={(e) => setEditFirst(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border border-border bg-card rounded-xl px-3 py-2 text-sm text-fg placeholder:text-muted-fg"
                     />
                     <input
                       type="text"
                       placeholder="Фамилия"
                       value={editLast}
                       onChange={(e) => setEditLast(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border border-border bg-card rounded-xl px-3 py-2 text-sm text-fg placeholder:text-muted-fg"
                     />
                     <input
                       type="email"
                       placeholder="Email"
                       value={editEmail}
                       onChange={(e) => setEditEmail(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border border-border bg-card rounded-xl px-3 py-2 text-sm text-fg placeholder:text-muted-fg"
                     />
                     <input
                       type="text"
                       placeholder="Telegram"
                       value={editTelegram}
                       onChange={(e) => setEditTelegram(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border border-border bg-card rounded-xl px-3 py-2 text-sm text-fg placeholder:text-muted-fg"
                     />
                     <input
                       type="text"
                       placeholder="VK"
                       value={editVk}
                       onChange={(e) => setEditVk(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      className="w-full border border-border bg-card rounded-xl px-3 py-2 text-sm text-fg placeholder:text-muted-fg"
                     />
                   </div>
                 )}
@@ -195,14 +211,14 @@ export function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setEditing(true)}
-                  className="text-sm text-blue-600"
+                  className="text-sm text-accent font-medium"
                 >
                   Изменить
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCars(true)}
-                  className="text-sm text-gray-600"
+                  className="text-sm text-muted-fg"
                 >
                   Выбрать авто
                 </button>
@@ -213,14 +229,14 @@ export function ProfilePage() {
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 bg-accent text-accent-fg text-sm rounded-xl disabled:opacity-50"
                 >
                   {saving ? "Сохранение..." : "Сохранить"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="px-4 py-2 border border-gray-200 text-gray-700 text-sm rounded-lg"
+                  className="px-4 py-2 border border-border bg-card/50 text-fg text-sm rounded-xl"
                 >
                   Отмена
                 </button>
@@ -232,9 +248,9 @@ export function ProfilePage() {
             <button
               type="button"
               onClick={() => setShowNotifications(!showNotifications)}
-              className="w-full py-3 px-4 bg-white border border-gray-100 rounded-xl text-left flex items-center justify-between"
+              className="w-full py-3 px-4 bg-card/70 backdrop-blur-xl border border-border rounded-2xl text-left flex items-center justify-between shadow-ios"
             >
-              <span className="font-medium text-gray-900">Уведомления</span>
+              <span className="font-medium text-fg">Уведомления</span>
               {unreadCount > 0 && (
                 <span className="bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
                   {unreadCount}
@@ -244,22 +260,22 @@ export function ProfilePage() {
             {showNotifications && (
               <ul className="mt-2 space-y-2">
                 {notifications.length === 0 ? (
-                  <li className="text-sm text-gray-500 py-2">Нет уведомлений</li>
+                  <li className="text-sm text-muted-fg py-2">Нет уведомлений</li>
                 ) : (
                   notifications.map((n) => (
                     <li
                       key={n._id}
-                      className={`p-3 rounded-lg border text-sm ${n.read ? "bg-gray-50 border-gray-100" : "bg-blue-50/50 border-blue-100"}`}
+                      className={`p-3 rounded-2xl border text-sm ${n.read ? "bg-card/60 border-border" : "bg-accent/10 border-accent/30"}`}
                     >
-                      {n.title && <p className="font-medium text-gray-900">{n.title}</p>}
-                      <p className="text-gray-700 mt-0.5">{n.body}</p>
+                      {n.title && <p className="font-medium text-fg">{n.title}</p>}
+                      <p className="text-muted-fg mt-0.5">{n.body}</p>
                       {!n.read && (
                         <button
                           type="button"
                           onClick={() => {
                             markNotificationRead(n._id).then(loadNotifications);
                           }}
-                          className="mt-2 text-xs text-blue-600"
+                          className="mt-2 text-xs text-accent font-medium"
                         >
                           Отметить прочитанным
                         </button>
@@ -271,38 +287,58 @@ export function ProfilePage() {
             )}
           </div>
 
+          <div className="mt-4 bg-card/70 backdrop-blur-xl rounded-2xl border border-border shadow-ios p-4">
+            <p className="font-medium text-fg">Тема</p>
+            <div className="mt-3 flex rounded-2xl bg-muted p-1">
+              {(["light", "system", "dark"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setTheme(v)}
+                  className={[
+                    "flex-1 py-2 text-xs rounded-xl transition",
+                    theme === v ? "bg-card text-fg shadow-ios2" : "text-muted-fg hover:text-fg",
+                  ].join(" ")}
+                >
+                  {v === "light" ? "Светлая" : v === "dark" ? "Тёмная" : "Система"}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-fg mt-2">Как в iOS: можно привязать к системной.</p>
+          </div>
+
           {showCars && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-10">
-              <div className="bg-white rounded-xl p-4 max-w-sm w-full max-h-[80vh] overflow-auto">
-                <p className="font-medium text-gray-900 mb-3">Выберите автомобиль</p>
+              <div className="bg-card rounded-2xl p-4 max-w-sm w-full max-h-[80vh] overflow-auto border border-border shadow-ios">
+                <p className="font-medium text-fg mb-3">Выберите автомобиль</p>
                 <div className="grid grid-cols-2 gap-2">
                   {cars.map((car) => (
                     <button
                       key={car._id}
                       type="button"
                       onClick={() => handleSelectCar(car)}
-                      className="rounded-lg border border-gray-200 p-2 text-center hover:bg-gray-50"
+                      className="rounded-2xl border border-border bg-card/70 p-2 text-center hover:bg-muted transition"
                     >
                       {(car.profile_preview_url || car.images[0]?.url) ? (
                         <img
                           src={car.profile_preview_url || car.images[0]?.url}
                           alt={car.name}
-                          className="w-full h-20 object-contain rounded"
+                          className="w-full h-20 object-contain rounded-xl"
                         />
                       ) : (
                         <span className="text-2xl">🚗</span>
                       )}
-                      <p className="text-xs mt-1 text-gray-700 truncate">{car.name}</p>
+                      <p className="text-xs mt-1 text-muted-fg truncate">{car.name}</p>
                     </button>
                   ))}
                 </div>
                 {cars.length === 0 && (
-                  <p className="text-sm text-gray-500 py-4">Нет доступных типов авто</p>
+                  <p className="text-sm text-muted-fg py-4">Нет доступных типов авто</p>
                 )}
                 <button
                   type="button"
                   onClick={() => setShowCars(false)}
-                  className="mt-4 w-full py-2 border border-gray-200 rounded-lg text-gray-700 text-sm"
+                  className="mt-4 w-full py-2 border border-border rounded-xl text-fg text-sm bg-card/50"
                 >
                   Закрыть
                 </button>
@@ -316,7 +352,7 @@ export function ProfilePage() {
         <button
           type="button"
           onClick={logout}
-          className="w-full py-3 border border-gray-200 text-gray-700 font-medium rounded-xl"
+          className="w-full py-3 border border-border bg-card/60 text-fg font-medium rounded-2xl shadow-ios"
         >
           Выйти
         </button>

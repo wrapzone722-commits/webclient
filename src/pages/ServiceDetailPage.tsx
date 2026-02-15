@@ -31,24 +31,25 @@ export function ServiceDetailPage() {
   }, [id]);
 
   if (!id) return null;
-  if (loading && !service) return <div className="p-4 text-gray-500">Загрузка...</div>;
+  if (loading && !service) return <div className="p-4 max-w-md mx-auto text-muted-fg">Загрузка...</div>;
   if (error && !service) return <div className="p-4 text-red-600">{error}</div>;
-  if (!service) return <div className="p-4">Услуга не найдена</div>;
+  if (!service) return <div className="p-4 max-w-md mx-auto text-muted-fg">Услуга не найдена</div>;
 
   return (
-    <div className="p-4">
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-4">
-        <h1 className="text-lg font-semibold text-gray-900">{service.name}</h1>
-        <p className="text-sm text-gray-500 mt-1">{service.category}</p>
-        <p className="text-gray-700 mt-3">{service.description}</p>
-        <div className="mt-4 flex gap-4">
-          <span className="text-blue-600 font-medium">{formatPrice(service.price)}</span>
-          <span className="text-gray-500">{formatDuration(service.duration)}</span>
+    <div className="p-4 max-w-md mx-auto">
+      <div className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border shadow-ios p-5 mb-4">
+        <p className="text-xs text-muted-fg mb-2">{service.category}</p>
+        <h1 className="text-2xl font-semibold text-fg tracking-tight">{service.name}</h1>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="text-accent font-semibold">{formatPrice(service.price)}</span>
+          <span className="text-sm text-muted-fg">·</span>
+          <span className="text-sm text-muted-fg">{formatDuration(service.duration)}</span>
         </div>
+        <p className="text-sm text-muted-fg mt-4 leading-relaxed">{service.description}</p>
       </div>
       <Link
         to={`/services/${id}/book`}
-        className="block w-full py-3 text-center bg-blue-600 text-white font-medium rounded-xl"
+        className="block w-full py-3.5 text-center bg-accent text-accent-fg font-semibold rounded-2xl shadow-ios2"
       >
         Записаться
       </Link>

@@ -4,6 +4,23 @@ import { setApiBaseUrl } from "@/api/client";
 import App from "./App";
 import "./index.css";
 
+type ThemePref = "light" | "dark" | "system";
+const THEME_KEY = "sb_web_theme";
+
+function applyTheme(pref: ThemePref) {
+  const root = document.documentElement;
+  const wantsDark =
+    pref === "dark" ||
+    (pref === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  root.classList.toggle("dark", wantsDark);
+}
+
+function initTheme() {
+  const raw = (localStorage.getItem(THEME_KEY) as ThemePref | null) ?? "system";
+  const pref: ThemePref = raw === "light" || raw === "dark" || raw === "system" ? raw : "system";
+  applyTheme(pref);
+}
+
 async function loadRuntimeConfig() {
   try {
     const r = await fetch("/config.json");
@@ -32,4 +49,5 @@ function renderApp() {
   );
 }
 
+initTheme();
 loadRuntimeConfig().finally(renderApp);

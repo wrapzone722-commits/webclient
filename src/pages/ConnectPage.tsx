@@ -104,39 +104,39 @@ export function ConnectPage() {
   }, [scanning, reader, navigate, setFromQr]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-md mx-auto">
-        <h1 className="text-xl font-semibold text-gray-900">Подключение к бэкенду</h1>
-        <p className="text-sm text-gray-600 mt-2">
+        <h1 className="text-2xl font-semibold text-fg tracking-tight">Подключение</h1>
+        <p className="text-sm text-muted-fg mt-2">
           Отсканируйте QR-код из консоли или введите URL сервера вручную.
         </p>
 
-        <div className="mt-4 bg-white border border-gray-100 rounded-xl p-4 space-y-3">
+        <div className="mt-4 bg-card/70 backdrop-blur-xl border border-border rounded-2xl shadow-ios p-4 space-y-3">
           {apiBaseUrl && (
-            <div className="p-3 rounded-lg bg-green-50 border border-green-100">
-              <p className="text-sm text-green-800">
-                Подключено: <span className="font-medium">{apiBaseUrl}</span>
+            <div className="p-3 rounded-2xl bg-accent/10 border border-accent/25">
+              <p className="text-sm text-fg">
+                Подключено: <span className="font-medium text-fg">{apiBaseUrl}</span>
               </p>
               <div className="mt-2 flex gap-2">
                 <button
                   type="button"
                   onClick={() => navigate("/", { replace: true })}
-                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm"
+                  className="px-3 py-1.5 bg-accent text-accent-fg rounded-xl text-sm shadow-ios2"
                 >
                   Продолжить
                 </button>
                 {!apiKey && tgBot && (
-                  <span className="text-xs text-gray-600 self-center">Можно войти через Telegram ниже</span>
+                  <span className="text-xs text-muted-fg self-center">Можно войти через Telegram ниже</span>
                 )}
               </div>
             </div>
           )}
-          <label className="block text-sm font-medium text-gray-700">URL бэкенда</label>
+          <label className="block text-sm font-medium text-fg">URL бэкенда</label>
           <input
             value={manual}
             onChange={(e) => setManual(e.target.value)}
             placeholder="https://example.com"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-border bg-card rounded-2xl px-3 py-2 text-sm text-fg placeholder:text-muted-fg"
             inputMode="url"
           />
           <button
@@ -146,26 +146,26 @@ export function ConnectPage() {
               if (!manual.trim()) return;
               setFromManual(manual);
             }}
-            className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm"
+            className="w-full py-2 bg-accent text-accent-fg rounded-2xl text-sm shadow-ios2"
           >
             Сохранить
           </button>
 
-          <div className="pt-2 border-t border-gray-100">
+          <div className="pt-2 border-t border-border">
             <button
               type="button"
               onClick={() => setScanning((v) => !v)}
-              className="w-full py-2 border border-gray-200 rounded-lg text-sm text-gray-700"
+              className="w-full py-2 border border-border bg-card/50 rounded-2xl text-sm text-fg"
             >
               {scanning ? "Остановить сканер" : "Сканировать QR-код"}
             </button>
 
             {scanning && (
               <div className="mt-3">
-                <div className="rounded-lg overflow-hidden bg-black aspect-video">
+                <div className="rounded-2xl overflow-hidden bg-black aspect-video ring-1 ring-border">
                   <video ref={videoRef} className="w-full h-full object-cover" muted playsInline />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-muted-fg mt-2">
                   Камера работает только по HTTPS (или на localhost). Разрешите доступ к камере в браузере.
                 </p>
               </div>
@@ -173,15 +173,15 @@ export function ConnectPage() {
           </div>
 
           {apiBaseUrl && tgBot && (
-            <div className="pt-2 border-t border-gray-100">
-              <p className="text-sm font-medium text-gray-700 mb-2">Авторизация</p>
+            <div className="pt-2 border-t border-border">
+              <p className="text-sm font-medium text-fg mb-2">Авторизация</p>
               {apiKey && (
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-muted-fg mb-2">
                   Сейчас токен уже есть. Вход через Telegram заменит его.
                 </p>
               )}
               <div ref={tgContainerRef} />
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-muted-fg mt-2">
                 Если виджет не появляется — проверьте, что домен добавлен в настройках бота (BotFather) и на бэкенде
                 задан `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME`.
               </p>
@@ -189,7 +189,11 @@ export function ConnectPage() {
           )}
         </div>
 
-        {(error || tgError) && <div className="mt-3 text-sm text-red-600">{error || tgError}</div>}
+        {(error || tgError) && (
+          <div className="mt-3 text-sm text-red-600 bg-card/60 backdrop-blur-xl border border-border rounded-2xl p-3 shadow-ios">
+            {error || tgError}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -86,8 +86,8 @@ export function BookingCreatePage() {
   if (!id) return null;
   if (loading && !service) {
     return (
-      <div className="p-4">
-        <p className="text-gray-500">Загрузка...</p>
+      <div className="p-4 max-w-md mx-auto">
+        <p className="text-muted-fg">Загрузка...</p>
       </div>
     );
   }
@@ -102,11 +102,11 @@ export function BookingCreatePage() {
 
   if (success) {
     return (
-      <div className="p-4">
-        <div className="bg-green-50 text-green-800 rounded-xl p-4 mb-4">
+      <div className="p-4 max-w-md mx-auto">
+        <div className="bg-accent/10 text-fg rounded-2xl border border-accent/25 p-4 mb-4 shadow-ios">
           Запись создана! Ожидайте подтверждения.
         </div>
-        <Link to="/bookings" className="block w-full py-3 text-center bg-blue-600 text-white font-medium rounded-xl">
+        <Link to="/bookings" className="block w-full py-3.5 text-center bg-accent text-accent-fg font-semibold rounded-2xl shadow-ios2">
           Мои записи
         </Link>
       </div>
@@ -114,30 +114,30 @@ export function BookingCreatePage() {
   }
 
   return (
-    <div className="p-4">
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-4">
-        <h1 className="font-semibold text-gray-900">{service.name}</h1>
-        <p className="text-sm text-gray-500">{formatPrice(service.price)} · {formatDuration(service.duration)}</p>
+    <div className="p-4 max-w-md mx-auto">
+      <div className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border shadow-ios p-4 mb-4">
+        <h1 className="text-xl font-semibold text-fg tracking-tight">{service.name}</h1>
+        <p className="text-sm text-muted-fg mt-1">{formatPrice(service.price)} · {formatDuration(service.duration)}</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+          <label className="block text-sm font-medium text-fg mb-1">Дата</label>
           <input
             type="date"
             min={today}
             max={maxDate}
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2"
+            className="w-full border border-border bg-card/70 backdrop-blur-xl rounded-2xl px-3 py-2 text-sm text-fg shadow-ios"
           />
         </div>
         {posts.length > 1 && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Пост</label>
+            <label className="block text-sm font-medium text-fg mb-1">Пост</label>
             <select
               value={selectedPostId}
               onChange={(e) => setSelectedPostId(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2"
+              className="w-full border border-border bg-card/70 backdrop-blur-xl rounded-2xl px-3 py-2 text-sm text-fg shadow-ios"
             >
               {posts.map((p) => (
                 <option key={p._id} value={p._id}>{p.name}</option>
@@ -146,10 +146,10 @@ export function BookingCreatePage() {
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Время</label>
+          <label className="block text-sm font-medium text-fg mb-1">Время</label>
           <div className="flex flex-wrap gap-2">
             {availableSlots.length === 0 && selectedDate ? (
-              <p className="text-gray-500 text-sm">Нет свободных слотов</p>
+              <p className="text-muted-fg text-sm">Нет свободных слотов</p>
             ) : (
               availableSlots.map((slot) => {
                 const time = slot.time.slice(11, 16);
@@ -159,8 +159,8 @@ export function BookingCreatePage() {
                     key={slot.id}
                     type="button"
                     onClick={() => setSelectedSlot(slot)}
-                    className={`px-3 py-1.5 rounded-lg text-sm ${
-                      isSelected ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700"
+                    className={`px-3 py-2 rounded-2xl text-sm border shadow-ios2 transition ${
+                      isSelected ? "bg-accent text-accent-fg border-accent/30" : "bg-card/60 text-fg border-border hover:bg-muted"
                     }`}
                   >
                     {time}
@@ -171,20 +171,20 @@ export function BookingCreatePage() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+          <label className="block text-sm font-medium text-fg mb-1">Комментарий</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Необязательно"
             rows={2}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2"
+            className="w-full border border-border bg-card/70 backdrop-blur-xl rounded-2xl px-3 py-2 text-sm text-fg placeholder:text-muted-fg shadow-ios"
           />
         </div>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <button
           type="submit"
           disabled={submitting || !selectedSlot}
-          className="w-full py-3 bg-blue-600 text-white font-medium rounded-xl disabled:opacity-50"
+          className="w-full py-3.5 bg-accent text-accent-fg font-semibold rounded-2xl shadow-ios2 disabled:opacity-50"
         >
           {submitting ? "Отправка..." : "Подтвердить запись"}
         </button>

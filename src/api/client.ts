@@ -1,13 +1,34 @@
 /**
  * API-клиент для веб-приложения (тот же бэкенд, что и iOS).
- * Базовый URL: VITE_API_BASE_URL или относительный /api (proxy в dev).
+ * Базовый URL: из window.__API_BASE_URL__ (runtime), иначе VITE_API_BASE_URL (сборка).
  */
 
-const BASE =
-  (typeof import.meta !== "undefined" &&
-    (import.meta as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL) ||
-  "";
+function getBaseUrl(): string {
+  const win = typeof window !== "undefined" ? (window as Window & { __API_BASE_URL__?: string }) : null;
+  const fromWindow = win?.__API_BASE_URL__;
+  if (fromWindow && typeof fromWindow === "string") return fromWindow.replace(/\/$/, "");
+  const env =
+    typeof import.meta !== "undefined" &&
+    (import.meta as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL;
+  return (env && env.replace(/\/$/, "")) || "";
+}
+
+let BASE = getBaseUrl();
+export function setApiBaseUrl(url: string) {
+  BASE = url.replace(/\/$/, "");
+}
+
 const API_PREFIX = "/api/v1";
+
+/** Проверка: ответ не должен быть HTML (иначе запрос ушёл не на API). */
+function ensureJsonResponse(text: string): void {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("<") || trimmed.startsWith("<!")) {
+    throw new Error(
+      "Сервер вернул страницу вместо данных. Укажите URL бэкенда: положите в корень сайта файл config.json с полем api_base_url (например {\"api_base_url\": \"https://ваш-бэкенд.ru\"}) или соберите приложение с переменной VITE_API_BASE_URL."
+    );
+  }
+}
 
 function getHeaders(apiKey: string | null): HeadersInit {
   const headers: Record<string, string> = {
@@ -22,6 +43,7 @@ function getHeaders(apiKey: string | null): HeadersInit {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   const text = await res.text();
+  ensureJsonResponse(text);
   if (!res.ok) {
     let message = res.statusText;
     try {
@@ -78,13 +100,23 @@ export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
   return handleResponse<T>(res);
 }
 
+export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
+  const res = await fetch(url(path), {
+    method: "PATCH",
+    headers: getHeaders(apiKeyGetter()),
+    body: body != null ? JSON.stringify(body) : undefined,
+  });
+  return handleResponse<T>(res);
+}
+
 export async function apiDelete(path: string): Promise<void> {
   const res = await fetch(url(path), {
     method: "DELETE",
     headers: getHeaders(apiKeyGetter()),
   });
+  const text = await res.text();
+  ensureJsonResponse(text);
   if (!res.ok) {
-    const text = await res.text();
     let message = res.statusText;
     try {
       const json = JSON.parse(text);
@@ -103,6 +135,7 @@ export async function apiGetBlob(path: string): Promise<Blob> {
   const res = await fetch(full, { method: "GET", headers: getHeaders(apiKeyGetter()) });
   if (!res.ok) {
     const text = await res.text();
+    ensureJsonResponse(text);
     let message = res.statusText;
     try {
       const json = JSON.parse(text);
@@ -125,6 +158,9 @@ import type {
   Post,
   User,
   RegisterClientResponse,
+  UpdateProfileRequest,
+  CarFolder,
+  Notification,
 } from "./types";
 
 export async function registerClient(deviceId: string): Promise<RegisterClientResponse> {
@@ -155,6 +191,10 @@ export async function cancelBooking(id: string): Promise<void> {
   return apiDelete(`/bookings/${id}`);
 }
 
+export async function submitRating(bookingId: string, rating: number, comment?: string | null): Promise<void> {
+  await apiPost(`/bookings/${bookingId}/rating`, { rating: Math.min(5, Math.max(1, Math.round(rating))), comment: comment ?? null });
+}
+
 export async function fetchBookingAct(bookingId: string): Promise<Blob> {
   return apiGetBlob(`/bookings/${bookingId}/act`);
 }
@@ -173,4 +213,28 @@ export async function fetchPosts(): Promise<Post[]> {
 
 export async function fetchProfile(): Promise<User> {
   return apiGet<User>("/profile");
+}
+
+export async function updateProfile(req: UpdateProfileRequest): Promise<User> {
+  const body: Record<string, unknown> = {};
+  if (req.first_name !== undefined) body.first_name = req.first_name;
+  if (req.last_name !== undefined) body.last_name = req.last_name;
+  if (req.email !== undefined) body.email = req.email;
+  if (req.social_links !== undefined) body.social_links = req.social_links;
+  if (req.telegram !== undefined) body.telegram = req.telegram;
+  if (req.selected_car_id !== undefined) body.selected_car_id = req.selected_car_id ?? null;
+  if (req.profile_photo_url !== undefined) body.profile_photo_url = req.profile_photo_url ?? null;
+  return apiPut<User>("/profile", Object.keys(body).length ? body : undefined);
+}
+
+export async function fetchCars(): Promise<CarFolder[]> {
+  return apiGet<CarFolder[]>("/cars/folders");
+}
+
+export async function fetchNotifications(): Promise<Notification[]> {
+  return apiGet<Notification[]>("/notifications");
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await apiPatch(`/notifications/${id}/read`, {});
 }

@@ -27,6 +27,8 @@ export interface Booking {
   notes: string | null;
   created_at: string;
   in_progress_started_at?: string | null;
+  rating?: number | null;
+  rating_comment?: string | null;
 }
 
 export interface CreateBookingRequest {
@@ -52,6 +54,13 @@ export interface Post {
   interval_minutes: number;
 }
 
+export interface SocialLinks {
+  telegram?: string | null;
+  vk?: string | null;
+  whatsapp?: string | null;
+  instagram?: string | null;
+}
+
 export interface User {
   _id: string;
   first_name: string;
@@ -59,9 +68,49 @@ export interface User {
   phone: string;
   email: string | null;
   avatar_url: string | null;
-  social_links?: Record<string, string | null>;
+  social_links?: SocialLinks;
   client_tier?: string;
   loyalty_points?: number;
+  name?: string;
+  profile_photo_url?: string | null;
+  display_photo_name?: string;
+}
+
+export interface UpdateProfileRequest {
+  first_name?: string;
+  last_name?: string;
+  email?: string | null;
+  telegram?: string | null;
+  social_links?: SocialLinks;
+  selected_car_id?: string | null;
+  profile_photo_url?: string | null;
+}
+
+export interface CarImage {
+  name: string;
+  url: string;
+  thumbnail_url?: string;
+}
+
+export interface CarFolder {
+  _id: string;
+  name: string;
+  images: CarImage[];
+  default_photo_name?: string;
+  profile_preview_url?: string;
+  profile_preview_thumbnail_url?: string;
+}
+
+export type NotificationType = "service" | "admin";
+
+export interface Notification {
+  _id: string;
+  client_id: string;
+  body: string;
+  created_at: string;
+  type: NotificationType;
+  title: string | null;
+  read: boolean;
 }
 
 export interface RegisterClientResponse {

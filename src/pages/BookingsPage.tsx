@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchBookings, cancelBooking, fetchBookingAct } from "@/api/client";
+import { fetchBookings, cancelBooking, fetchBookingAct, submitRating } from "@/api/client";
 import type { Booking } from "@/api/types";
 import { formatDate, formatTime, formatPrice } from "@/lib/format";
 
@@ -21,6 +21,10 @@ export function BookingsPage() {
   const [actLoadingId, setActLoadingId] = useState<string | null>(null);
   const [actError, setActError] = useState<string | null>(null);
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
+  const [ratingBooking, setRatingBooking] = useState<Booking | null>(null);
+  const [ratingStars, setRatingStars] = useState(5);
+  const [ratingComment, setRatingComment] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -72,6 +76,20 @@ export function BookingsPage() {
     }
   };
 
+  const handleRatingSubmit = async () => {
+    if (!ratingBooking) return;
+    setRatingSubmitting(true);
+    try {
+      await submitRating(ratingBooking._id, ratingStars, ratingComment.trim() || null);
+      setRatingBooking(null);
+      setRatingStars(5);
+      setRatingComment("");
+      load();
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-xl font-semibold text-gray-900 mb-4">Мои записи</h1>
@@ -109,13 +127,30 @@ export function BookingsPage() {
                   <p className="text-sm text-gray-500 mt-0.5">
                     {formatDate(b.date_time)} · {formatTime(b.date_time)}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">{statusLabel[b.status] ?? b.status}</p>
+                  <span
+                    className={`inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded ${
+                      b.status === "pending"
+                        ? "bg-orange-100 text-orange-700"
+                        : b.status === "confirmed"
+                          ? "bg-blue-100 text-blue-700"
+                          : b.status === "in_progress"
+                            ? "bg-purple-100 text-purple-700"
+                            : b.status === "completed"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {statusLabel[b.status] ?? b.status}
+                  </span>
                 </div>
                 <div className="text-right">
                   <span className="text-blue-600 font-medium">{formatPrice(b.price)}</span>
                 </div>
               </div>
-              <div className="mt-3 flex gap-2">
+              {b.notes && b.notes.trim() && (
+                <p className="text-sm text-gray-500 mt-1">{b.notes}</p>
+              )}
+              <div className="mt-3 flex flex-wrap gap-2">
                 {(b.status === "pending" || b.status === "confirmed") && (
                   <button
                     type="button"
@@ -126,14 +161,27 @@ export function BookingsPage() {
                   </button>
                 )}
                 {b.status === "completed" && (
-                  <button
-                    type="button"
-                    onClick={() => handleAct(b)}
-                    disabled={actLoadingId === b._id}
-                    className="text-sm text-blue-600 disabled:opacity-50"
-                  >
-                    {actLoadingId === b._id ? "Загрузка..." : "Акт"}
-                  </button>
+                  <>
+                    {b.rating != null ? (
+                      <span className="text-sm text-gray-500">Оценка: {b.rating} ★</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setRatingBooking(b)}
+                        className="text-sm text-amber-600"
+                      >
+                        Оценить
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleAct(b)}
+                      disabled={actLoadingId === b._id}
+                      className="text-sm text-blue-600 disabled:opacity-50"
+                    >
+                      {actLoadingId === b._id ? "Загрузка..." : "Акт"}
+                    </button>
+                  </>
                 )}
               </div>
             </li>
@@ -167,6 +215,50 @@ export function BookingsPage() {
                 className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm"
               >
                 Назад
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {ratingBooking && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-10">
+          <div className="bg-white rounded-xl p-4 max-w-sm w-full">
+            <p className="text-gray-900 font-medium">Оценить запись</p>
+            <p className="text-sm text-gray-500 mt-1">{ratingBooking.service_name}</p>
+            <div className="mt-3 flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setRatingStars(n)}
+                  className="text-2xl text-amber-400 hover:text-amber-500"
+                >
+                  {n <= ratingStars ? "★" : "☆"}
+                </button>
+              ))}
+            </div>
+            <textarea
+              placeholder="Комментарий (необязательно)"
+              value={ratingComment}
+              onChange={(e) => setRatingComment(e.target.value)}
+              className="mt-3 w-full border border-gray-200 rounded-lg p-2 text-sm"
+              rows={2}
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={handleRatingSubmit}
+                disabled={ratingSubmitting}
+                className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50"
+              >
+                {ratingSubmitting ? "Отправка..." : "Отправить"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setRatingBooking(null)}
+                className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm"
+              >
+                Отмена
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { setApiKeyGetter } from "@/api/client";
 import { registerClient } from "@/api/client";
+import { useBackend } from "@/context/BackendContext";
 
 const STORAGE_KEY = "sb_web_api_key";
 const DEVICE_ID_KEY = "sb_web_device_id";
@@ -24,6 +25,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { apiBaseUrl } = useBackend();
   const [apiKey, setApiKey] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY));
   const [isReady, setIsReady] = useState(false);
 
@@ -46,12 +48,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Пока нет URL бэкенда — не регистрируем устройство
+    if (!apiBaseUrl) {
+      setIsReady(false);
+      return;
+    }
     if (apiKey) {
       setIsReady(true);
       return;
     }
     register().catch(() => setIsReady(true));
-  }, []);
+  }, [apiBaseUrl]);
 
   const value = useMemo(
     () => ({ apiKey, isReady, register, logout }),

@@ -9,12 +9,15 @@ const nav = [
 export function Layout() {
   const location = useLocation();
 
+  const hideNav = location.pathname.startsWith("/connect");
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <main className="flex-1 pb-16">
         <Outlet />
       </main>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 safe-area-pb">
+      {!hideNav && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 safe-area-pb">
         {nav.map(({ to, label, icon }) => (
           <Link
             key={to}
@@ -33,7 +36,8 @@ export function Layout() {
             <span>{label}</span>
           </Link>
         ))}
-      </nav>
+        </nav>
+      )}
     </div>
   );
 }
